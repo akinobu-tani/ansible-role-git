@@ -1,0 +1,66 @@
+---
+
+- set_fact:
+    download_url: https://www.kernel.org/pub/software/scm/git/git-{{git_version}}.tar.gz
+    src_path: /usr/local/src/git-{{git_version}}
+
+- become: true
+  block:
+
+    - name: install EPEL repository
+      yum:
+        name: epel-release
+
+    - name: install dependencies
+      yum:
+        name: "{{item}}"
+        enablerepo: epel
+      with_items:
+        - make
+        - dh-autoreconf
+        - curl-devel
+        - expat-devel
+        - gettext-devel
+        - openssl-devel
+        - perl-devel
+        - zlib-devel
+        - asciidoc
+        - xmlto
+        - docbook2X
+
+    - name: create alias of docbook2X binary
+      file:
+        src: /usr/bin/db2x_docbook2texi
+        dest: /usr/bin/docbook2x-texi
+        state: link
+
+    - name: download and extract git tarball
+      unarchive:
+        src: "{{download_url}}"
+        dest: /usr/local/src
+        creates: "{{src_path}}/Makefile"
+        remote_src: yes
+
+    - name: make configure git
+      command: make configure
+      args:
+        chdir: "{{src_path}}"
+        creates: "{{src_path}}/configure"
+
+    - name: exec configure
+      command: ./configure --prefix=/usr/local
+      args:
+        chdir: "{{src_path}}"
+        creates: "{{src_path}}/config.status"
+
+    - name: make git
+      command: make all doc info
+      args:
+        chdir: "{{src_path}}"
+        creates: "{{src_path}}/git"
+
+    - name: install git
+      command: make install install-doc install-html install-info
+      args:
+        chdir: "{{src_path}}"
+        creates: /usr/local/bin/git

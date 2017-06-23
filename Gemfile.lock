@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git://github.com/akinobu-tani/kitchen-verifier-serverspec.git
-  revision: 207688600532793d4b130481e5b848f62a816f3f
+  revision: d2deb5b9b1333ef176198bf8a386ce7018dd1de6
   specs:
     kitchen-verifier-serverspec (0.6.8)
       net-ssh (>= 3)
